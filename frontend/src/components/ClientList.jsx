@@ -1,6 +1,7 @@
+import PropTypes from 'prop-types';
 import { Trash2 } from 'lucide-react';
 
-export default function ClientList({ clients, deleteClient }) {
+export default function ClientList({ clients, deleteClient, currentPage, totalPages, onPageChange }) {
     return (
         <div className="p-6 bg-gray-800 rounded-lg shadow-lg h-[70vh] w-[30vw] overflow-scroll">
             <h2 className="mb-4 text-2xl font-semibold text-blue-400">Client List</h2>
@@ -18,6 +19,39 @@ export default function ClientList({ clients, deleteClient }) {
                     </li>
                 ))}
             </ul>
+            <div className="flex justify-between mt-4">
+                <button
+                    onClick={() => onPageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md disabled:opacity-50"
+                >
+                    Previous
+                </button>
+                <span className="text-gray-300">
+                    Page {currentPage} of {totalPages}
+                </span>
+                <button
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md disabled:opacity-50"
+                >
+                    Next
+                </button>
+            </div>
         </div>
     );
 }
+
+// Validation des props
+ClientList.propTypes = {
+    clients: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        surname: PropTypes.string.isRequired,
+        telephone: PropTypes.string.isRequired,
+        adresse: PropTypes.string.isRequired,
+    })).isRequired,
+    deleteClient: PropTypes.func.isRequired,
+    currentPage: PropTypes.number.isRequired,
+    totalPages: PropTypes.number.isRequired,
+    onPageChange: PropTypes.func.isRequired,
+};

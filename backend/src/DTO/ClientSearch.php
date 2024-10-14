@@ -6,6 +6,9 @@ class ClientSearch
 {
     private ?string $telephone = null;
     private ?string $surname = null;
+
+    private ?string $adresse = null;
+
     private ?bool $compte = null;
 
     public function getTelephone(): ?string
@@ -24,9 +27,20 @@ class ClientSearch
         return $this->surname;
     }
 
+    public function getAdresse(): ?string
+    {
+        return $this->adresse;
+    }
+
     public function setSurname(?string $surname): self
     {
         $this->surname = $surname;
+        return $this;
+    }
+
+    public function setAdresse(?string $adresse): self
+    {
+        $this->adresse = $adresse;
         return $this;
     }
 

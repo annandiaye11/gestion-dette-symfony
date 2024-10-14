@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Plus } from 'lucide-react';
 
 export default function ClientForm({ addClient }) {
@@ -53,3 +54,7 @@ export default function ClientForm({ addClient }) {
         </div>
     );
 }
+// Validation des props
+ClientForm.propTypes = {
+    addClient: PropTypes.func.isRequired,
+};
