@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 class Client
@@ -13,9 +14,13 @@ class Client
      private ?int $id = null;
 
      #[ORM\Column(type: 'string', length: 255)]
+     #[Assert\NotBlank]
+     #[Assert\Length(max: 255)]
      private ?string $telephone = null;
 
      #[ORM\Column(type: 'string', length: 255)]
+     #[Assert\NotBlank]
+     #[Assert\Length(max: 255)]
      private ?string $surname = null;
 
      #[ORM\Column(type: 'string', length: 255)]
