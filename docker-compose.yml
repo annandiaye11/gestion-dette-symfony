@@ -6,11 +6,17 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "${FRONTEND_PORT}:5173"
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     networks:
       - app-network
     environment:
       - NODE_ENV=development
+      - VITE_API_URL=http://backend:${BACKEND_PORT:-8000}
+    depends_on:
+      - backend
 
   backend:
     build:
@@ -19,22 +25,28 @@ services:
     depends_on:
       - db
     ports:
-      - "${BACKEND_PORT}:8000"
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/var/www/html
     networks:
       - app-network
     environment:
-      DATABASE_URL: "pgsql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+      DATABASE_URL: "pgsql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-mydatabase}"
+      APP_ENV: dev
+      APP_SECRET: "${APP_SECRET:-somesecretkey}"
 
   db:
     image: postgres:13
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: "${POSTGRES_DB:-mydatabase}"
+      POSTGRES_USER: "${POSTGRES_USER:-user}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-password}"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
       - app-network
+    ports:
+      - "${DB_PORT:-5432}:5432"
 
 networks:
   app-network:

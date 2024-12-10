@@ -24,6 +24,11 @@ class ClientSearchType extends AbstractType
                 'label' => 'Nom de famille',
                 'attr' => ['class' => 'form-control']
             ])
+            ->add('adresse', TextType::class, [
+                'required' => false,
+                'label' => 'adresse',
+                'attr' => ['class' => 'form-control']
+            ])
             ->add('compte', ChoiceType::class, [
                 'choices' => [
                     'Oui' => true,

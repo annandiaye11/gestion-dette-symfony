@@ -13,13 +13,22 @@ use Symfony\Component\Routing\Annotation\Route;
 class ClientController extends AbstractController
 {
      #[Route('/api/clients', name: 'client_index', methods: ['GET'])]
-     public function index(ClientRepository $clientRepository): JsonResponse
+     public function index(Request $request, ClientRepository $clientRepository): JsonResponse
      {
-          $clients = $clientRepository->findAll();
+          $page = $request->query->getInt('page', 1);
+          $limit = $request->query->getInt('limit', 3);
 
-          $data = [];
+          $clients = $clientRepository->findBy([], [], $limit, ($page - 1) * $limit);
+          $totalClients = $clientRepository->count([]);
+
+          $data = [
+               'clients' => [],
+               'totalPages' => ceil($totalClients / $limit),
+               'currentPage' => $page,
+          ];
+
           foreach ($clients as $client) {
-               $data[] = [
+               $data['clients'][] = [
                     'id' => $client->getId(),
                     'telephone' => $client->getTelephone(),
                     'surname' => $client->getSurname(),
@@ -31,22 +40,37 @@ class ClientController extends AbstractController
      }
 
      #[Route('/api/clients/search', name: 'client_search', methods: ['GET'])]
-     public function search(Request $request, ClientRepository $clientRepository): JsonResponse
+     public function search(Request $request, ClientRepository $clientRepository, EntityManagerInterface $em): JsonResponse
      {
-          $telephone = $request->query->get('telephone');
+          $searchTerm = $request->query->get('search');
           $page = $request->query->getInt('page', 1);
-          $limit = $request->query->getInt('limit', 10);
+          $limit = $request->query->getInt('limit', 3);
 
-          $criteria = [];
-          if ($telephone) {
-               $criteria['telephone'] = $telephone;
-          }
+          $qb = $em->createQueryBuilder();
+          $qb->select('c')
+               ->from('App\Entity\Client', 'c')
+               ->where($qb->expr()->orX(
+                    $qb->expr()->like('c.surname', ':searchTerm'),
+                    $qb->expr()->like('c.telephone', ':searchTerm'),
+                    $qb->expr()->like('c.adresse', ':searchTerm')
+               ))
+               ->setParameter('searchTerm', '%' . $searchTerm . '%');
 
-          $clients = $clientRepository->findBy($criteria, null, $limit, ($page - 1) * $limit);
+          $totalClients = count($qb->getQuery()->getResult());
 
-          $data = [];
+          $qb->setFirstResult(($page - 1) * $limit)
+               ->setMaxResults($limit);
+
+          $clients = $qb->getQuery()->getResult();
+
+          $data = [
+               'clients' => [],
+               'totalPages' => ceil($totalClients / $limit),
+               'currentPage' => $page,
+          ];
+
           foreach ($clients as $client) {
-               $data[] = [
+               $data['clients'][] = [
                     'id' => $client->getId(),
                     'telephone' => $client->getTelephone(),
                     'surname' => $client->getSurname(),
